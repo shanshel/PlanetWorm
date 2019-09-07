@@ -25,7 +25,10 @@ public class Player : MonoBehaviour
     {
         var worldUp = Vector3.up;
         var lastDir = Planet.inst.getLastDir();
-      
+
+        playerHead.transform.LookAt(new Vector3(-lastDir.x * 5f, -lastDir.y * 5f, 7f), Vector3.up);
+
+        /*
         if (!GameManager.inst.isLevelingUp)
         {
             playerHead.transform.LookAt(new Vector3(-lastDir.x * 5f, -lastDir.y * 5f, 7f), Vector3.up);
@@ -35,12 +38,13 @@ public class Player : MonoBehaviour
         {
             playerHead.transform.LookAt(Planet.inst.currentPlanetContainer.transform.position, Vector3.up);
         }
+        */
 
     }
 
-    public GameObject getPlayerHead()
+    public Vector3 getPlayerHeadPos()
     {
-        return playerHead;
+        return playerHead.transform.position;
     }
 
     public GameObject getPlayerHeadModel()
@@ -59,12 +63,22 @@ public class Player : MonoBehaviour
 
     IEnumerator updateFollowPointInLevelingUp()
     {
-
-        var targetPos = new Vector3(playerHead.transform.position.x + 20f, playerHead.transform.position.y + 50f, playerHead.transform.position.z + 50f);
-        //targetPos = new Vector3(2f, 9f, 8f);
-        //yield return playerHead.transform.DOMove(targetPos, .95f).WaitForCompletion();
-        //playerHead.transform.DOMove(playerHeadPos, .1f);
         yield return null;
+    
+        var targetPos = new Vector3(playerHead.transform.position.x, playerHead.transform.position.y, playerHead.transform.position.z + 10f);
+        //targetPos = new Vector3(2f, 9f, 8f);
+        PlayerTrail.inst.setSpeedLevel(1);
+        yield return playerHead.transform.DOMove(targetPos, 1f).WaitForCompletion();
+        PlayerTrail.inst.setSpeedLevel(2);
+        //playerHead.transform.position = targetPos;
+        yield return new WaitForSeconds(.3f);
+        playerHead.transform.DOMove(playerHeadPos, .1f);
+        yield return new WaitForSeconds(.3f);
+        PlayerTrail.inst.setSpeedLevel(1);
 
+        yield return new WaitForSeconds(.4f);
+        PlayerTrail.inst.setSpeedLevel(0);
+        yield return null;
+   
     }
 }

@@ -30,75 +30,95 @@ public class PlayerTrail : MonoBehaviour
         generateObjectsLoop();
         speed = Planet.inst.getPlanetSpeed();
         Invoke("slowStart", .5f);
-        
+
+        StartCoroutine(coRotUpdate());
 
     }
 
     // Update is called once per frame
     float flashColor = 0f;
+
+    int speedLevel = 0;
+    public void setSpeedLevel(int _speedLevel)
+    {
+        speedLevel = _speedLevel;
+    }
+    IEnumerator coRotUpdate()
+    {
+
+        while (true)
+        {
+            playerPos = Player.inst.getPlayerHeadPos();
+            playerHeadObject.transform.LookAt(playerPos, Vector3.forward);
+            var _speed = speed;
+            if (speedLevel == 1)
+                _speed = 2f;
+            else if (speedLevel == 2)
+                _speed = 10f;
+
+            Debug.Log("D: " + playerPos);
+
+            if (Vector3.Distance(playerHeadObject.transform.position, playerPos) > .06f)
+            {
+                playerHeadObject.transform.position = Vector3.MoveTowards(playerHeadObject.transform.position, playerPos, Time.deltaTime * _speed);
+            }
+
+
+            //transform.position = Player.inst.getPlayerHead().transform.position;
+            for (var x = 0; x <= maxBodyPieceCount; x++)
+            {
+                var targetPos = playerHeadObject.transform.position;
+                if (x > 0)
+                {
+                    targetPos = bodyPices[x - 1].transform.position;
+                }
+
+                if (Vector3.Distance(bodyPices[x].transform.position, targetPos) > .8f)
+                {
+                    bodyPices[x].transform.position = Vector3.MoveTowards(bodyPices[x].transform.position, targetPos, Time.deltaTime * _speed * 50f);
+                }
+                else if (Vector3.Distance(bodyPices[x].transform.position, targetPos) > .12f)
+                {
+                    bodyPices[x].transform.position = Vector3.MoveTowards(bodyPices[x].transform.position, targetPos, Time.deltaTime * _speed);
+                }
+
+
+                bodyPices[x].transform.LookAt(Vector3.up);
+
+            }
+
+
+
+            for (var y = 0; y <= maxSlotCount; y++)
+            {
+
+                var targetPos = playerHeadObject.transform.position;
+                if (y > 0)
+                {
+                    targetPos = bodySlots[y - 1].transform.position;
+                }
+                if (Vector3.Distance(bodySlots[y].transform.position, targetPos) > .12f)
+                {
+                    bodySlots[y].transform.position = Vector3.MoveTowards(bodySlots[y].transform.position, targetPos, Time.deltaTime * _speed);
+                }
+
+
+
+                bodySlots[y].transform.LookAt(Vector3.up);
+            }
+
+            yield return null;
+        }
+       
+    }
+
     void Update()
     {
-        playerPos = Player.inst.getPlayerHead().transform.position;
-
-
-
-        if (Vector3.Distance(playerHeadObject.transform.position, playerPos) > .06f)
-        {
-            playerHeadObject.transform.position = Vector3.MoveTowards(playerHeadObject.transform.position, playerPos, Time.deltaTime * speed);
-        }
-        playerHeadObject.transform.LookAt(Player.inst.getPlayerHead().transform, Vector3.forward);
-        //transform.position = Player.inst.getPlayerHead().transform.position;
-        for (var x = 0; x <= maxBodyPieceCount; x++)
-        {
-            var targetPos = playerHeadObject.transform.position;
-            if (x > 0)
-            {
-                 targetPos = bodyPices[x - 1].transform.position;
-            }
-
-            if (Vector3.Distance(bodyPices[x].transform.position, targetPos) > .8f)
-            {
-                bodyPices[x].transform.position = Vector3.MoveTowards(bodyPices[x].transform.position, targetPos, Time.deltaTime * speed * 50f);
-            }
-            else if (Vector3.Distance(bodyPices[x].transform.position, targetPos) > .12f)
-            {
-                bodyPices[x].transform.position = Vector3.MoveTowards(bodyPices[x].transform.position, targetPos, Time.deltaTime * speed);
-            }
-
-
-            bodyPices[x].transform.LookAt(Vector3.up);
-
-        }
-
-
-
-        for (var y = 0; y <= maxSlotCount; y++)
-        {
-
-            var targetPos = playerHeadObject.transform.position;
-            if (y > 0)
-            {
-                targetPos = bodySlots[y - 1].transform.position;
-            }
-            if (Vector3.Distance(bodySlots[y].transform.position, targetPos) > .12f)
-            {
-                bodySlots[y].transform.position = Vector3.MoveTowards(bodySlots[y].transform.position, targetPos, Time.deltaTime * speed);
-            }
-
-
-
-            bodySlots[y].transform.LookAt(Vector3.up);
-        }
-
-
-        
-
+   
     }
 
     void slowStart()
     {
-  
-
         speed = Planet.inst.getPlanetSpeed() / 50f;
     }
 
@@ -181,7 +201,7 @@ public class PlayerTrail : MonoBehaviour
     public void eatBall(Transform target)
     {
         if (isReachedMax) return;
-        ScreenEffects.inst.flashScreen();
+        ScreenEffects.inst.flashScreen(new Color(0.88f, 1f, 0.14f), 150f, .35f);
         AudioManager.inst.playSFX(EnumsData.SFXEnum.eating);
        
         ScoreEffects.inst.doPointEffect(target);

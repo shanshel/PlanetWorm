@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviour
         Planet.inst.spawnNextPlanet();
         StartCoroutine(prepareLevel());
         //4. attach the trail to the new planet
+        //
         Invoke("attachPlayerTrailToActivePlanet", 1.8f);
         Invoke("endLevelingUp", 1.9f);
 
@@ -76,6 +77,16 @@ public class GameManager : MonoBehaviour
         Planet.inst.spawnEatable(bodySlotPerLevel + getExtraFoodLevel());
         PlayerTrail.inst.setSlotCount(PlayerTrail.inst.getSlotCount() + bodySlotPerLevel + getExtraFoodLevel());
         PlayerTrail.inst.prepareTrailForLevel();
+
+
+        //ScreenEffects.inst.flashScreen(new Color(.92f, .48f, .68f), 20f);
+        ScreenEffects.inst.setVignette(.55f);
+        yield return new WaitForSeconds(.2f);
+  
+        AudioManager.inst.playSFX(EnumsData.SFXEnum.levelUp);
+
+        yield return new WaitForSeconds(1.75f);
+        ScreenEffects.inst.setVignette(0.494f);
         yield return null;
     }
  
