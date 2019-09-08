@@ -15,7 +15,7 @@ public class PlayerTrail : MonoBehaviour
     public List<PlayerBodyPiece> bodyPices = new List<PlayerBodyPiece>();
     public List<GameObject> bodySlots = new List<GameObject>();
 
-    private Vector3 playerPos;
+    private Transform playerPos;
     private GameObject playerHeadObject;
 
 
@@ -43,12 +43,17 @@ public class PlayerTrail : MonoBehaviour
     {
         speedLevel = _speedLevel;
     }
+
+    float minDistance = .012f;
+    float commonSpeed = 1f;
     IEnumerator coRotUpdate()
     {
 
         while (true)
         {
-            playerPos = Player.inst.getPlayerHeadPos();
+            var playerTrans = Player.inst.getPlayerHeadTrans();
+            /*
+            
             playerHeadObject.transform.LookAt(playerPos, Vector3.forward);
             var _speed = speed;
             if (speedLevel == 1)
@@ -56,34 +61,50 @@ public class PlayerTrail : MonoBehaviour
             else if (speedLevel == 2)
                 _speed = 10f;
 
-            Debug.Log("D: " + playerPos);
+
 
             if (Vector3.Distance(playerHeadObject.transform.position, playerPos) > .06f)
             {
-                playerHeadObject.transform.position = Vector3.MoveTowards(playerHeadObject.transform.position, playerPos, Time.deltaTime * _speed);
+                playerHeadObject.transform.position = Vector3.MoveTowards(playerHeadObject.transform.position, playerPos, Time.smoothDeltaTime * _speed);
             }
+            */
 
 
             //transform.position = Player.inst.getPlayerHead().transform.position;
             for (var x = 0; x <= maxBodyPieceCount; x++)
             {
-                var targetPos = playerHeadObject.transform.position;
+
+                if (x == 0)
+                {
+                    float distanceToHead = Vector3.Distance(playerHeadObject.transform.position, playerTrans.position);
+
+                    float headTimeCal = Time.smoothDeltaTime * distanceToHead / minDistance * commonSpeed;
+
+                    if (headTimeCal > .5f)
+                    {
+                        headTimeCal = .5f;
+                    }
+                    playerHeadObject.transform.position = Vector3.Slerp(playerHeadObject.transform.position, playerTrans.position, headTimeCal);
+                    playerHeadObject.transform.LookAt(playerTrans.position, Vector3.forward);
+                }
+
+                var currentBodyPart = bodyPices[x].transform;
+                var prevBodyPart = playerHeadObject.transform;
                 if (x > 0)
                 {
-                    targetPos = bodyPices[x - 1].transform.position;
+                    prevBodyPart = bodyPices[x - 1].transform;
                 }
+       
+                float distanceToTarget = Vector3.Distance(currentBodyPart.position, prevBodyPart.position);
+                float timeCal = Time.smoothDeltaTime * distanceToTarget / minDistance * commonSpeed;
 
-                if (Vector3.Distance(bodyPices[x].transform.position, targetPos) > .8f)
+                if (timeCal > .5f)
                 {
-                    bodyPices[x].transform.position = Vector3.MoveTowards(bodyPices[x].transform.position, targetPos, Time.deltaTime * _speed * 50f);
-                }
-                else if (Vector3.Distance(bodyPices[x].transform.position, targetPos) > .12f)
-                {
-                    bodyPices[x].transform.position = Vector3.MoveTowards(bodyPices[x].transform.position, targetPos, Time.deltaTime * _speed);
+                    timeCal = .5f;
                 }
 
-
-                bodyPices[x].transform.LookAt(Vector3.up);
+                currentBodyPart.position = Vector3.Slerp(currentBodyPart.position, prevBodyPart.position, timeCal);
+                currentBodyPart.rotation = Quaternion.Slerp(currentBodyPart.rotation, prevBodyPart.rotation, timeCal);
 
             }
 
@@ -92,19 +113,25 @@ public class PlayerTrail : MonoBehaviour
             for (var y = 0; y <= maxSlotCount; y++)
             {
 
-                var targetPos = playerHeadObject.transform.position;
+                var currentBodyPart = bodySlots[y].transform;
+                var prevBodyPart = playerHeadObject.transform;
+
                 if (y > 0)
                 {
-                    targetPos = bodySlots[y - 1].transform.position;
+                    prevBodyPart = bodySlots[y - 1].transform;
                 }
-                if (Vector3.Distance(bodySlots[y].transform.position, targetPos) > .12f)
+
+                float distanceToTarget = Vector3.Distance(currentBodyPart.position, prevBodyPart.position);
+                float timeCal = Time.smoothDeltaTime * distanceToTarget / minDistance * commonSpeed;
+                if (timeCal > .5f)
                 {
-                    bodySlots[y].transform.position = Vector3.MoveTowards(bodySlots[y].transform.position, targetPos, Time.deltaTime * _speed);
+                    timeCal = .5f;
                 }
 
-
-
-                bodySlots[y].transform.LookAt(Vector3.up);
+                currentBodyPart.position = Vector3.Slerp(currentBodyPart.position, prevBodyPart.position, timeCal);
+                currentBodyPart.rotation = Quaternion.Slerp(currentBodyPart.rotation, prevBodyPart.rotation, timeCal);
+                //bodySlots[y].transform.LookAt(Vector3.up);
+        
             }
 
             yield return null;
@@ -132,7 +159,7 @@ public class PlayerTrail : MonoBehaviour
         playerHeadObject = Instantiate(Player.inst.getPlayerHeadModel(), transform.position, Quaternion.identity, Planet.inst.getTrailContainerTransform());
 
 
-        for (var x = 0; x < 50; x++)
+        for (var x = 0; x < 1000; x++)
         {
             var gobject = Instantiate(bodyPiece, transform.position, Quaternion.identity, Planet.inst.getTrailContainerTransform());
 

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 944505150815036229}
   - component: {fileID: 944505150815036234}
   - component: {fileID: -936961359549924348}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: BodyTrailPiece
   m_TagString: Untagged
   m_Icon: {fileID: 0}

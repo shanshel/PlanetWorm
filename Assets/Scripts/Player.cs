@@ -42,9 +42,9 @@ public class Player : MonoBehaviour
 
     }
 
-    public Vector3 getPlayerHeadPos()
+    public Transform getPlayerHeadTrans()
     {
-        return playerHead.transform.position;
+        return playerHead.transform;
     }
 
     public GameObject getPlayerHeadModel()
@@ -64,7 +64,8 @@ public class Player : MonoBehaviour
     IEnumerator updateFollowPointInLevelingUp()
     {
         yield return null;
-    
+        
+        /*
         var targetPos = new Vector3(playerHead.transform.position.x, playerHead.transform.position.y, playerHead.transform.position.z + 10f);
         //targetPos = new Vector3(2f, 9f, 8f);
         PlayerTrail.inst.setSpeedLevel(1);
@@ -79,6 +80,7 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(.4f);
         PlayerTrail.inst.setSpeedLevel(0);
         yield return null;
+        */
    
     }
 }

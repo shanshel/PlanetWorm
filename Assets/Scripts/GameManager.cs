@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
         level += 1;
         isLevelingUp = true;
         //1.Unattach the Trail from the Plant
-        Planet.inst.getTrailContainerTransform().SetParent(Planet.inst.transform);
+        //Planet.inst.getTrailContainerTransform().SetParent(Planet.inst.transform);
         Player.inst.whileLevelingUp();
         //2.Move the Planet toward behind of the camera 
         Planet.inst.moveActivePlanetBehindCamera();

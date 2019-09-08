@@ -107,8 +107,8 @@ public class Planet : MonoBehaviour
     {
         oldPlanet = currentPlanetContainer;
         var currentValue = oldPlanet.transform.position;
-        var endValue = new Vector3(currentValue.x - 2f, currentValue.y - 2f, currentValue.z - 2f);
-        oldPlanet.transform.DOMove(endValue, 1.5f);
+        var endValue = new Vector3(currentValue.x - 2f, currentValue.y - 3f, currentValue.z - 2f);
+        oldPlanet.transform.DOMove(endValue, 1.8f);
         Destroy(oldPlanet, 3f);
     }
 
