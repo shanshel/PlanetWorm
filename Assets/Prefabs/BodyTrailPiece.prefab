@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 944505150815036229}
   - component: {fileID: 944505150815036234}
   - component: {fileID: -936961359549924348}
+  - component: {fileID: 7292708197819622919}
   m_Layer: 9
   m_Name: BodyTrailPiece
   m_TagString: Untagged
@@ -92,3 +93,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gettingSmallerSpeed: 0.1
   timeOffset: 0.01
+--- !u!135 &7292708197819622919
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 944505150815036232}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.05
+  m_Center: {x: 0, y: 0, z: 0}

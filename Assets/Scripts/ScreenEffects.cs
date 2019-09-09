@@ -60,7 +60,8 @@ public class ScreenEffects : MonoBehaviour
     void Update()
     {
 
-
+        if (!GameManager.inst.isGameStarted)
+            return;
 
         if (isFlashing)
         {

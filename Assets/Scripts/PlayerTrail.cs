@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using DG.Tweening;
 public class PlayerTrail : MonoBehaviour
 {
 
@@ -28,7 +28,7 @@ public class PlayerTrail : MonoBehaviour
     void Start()
     {
         generateObjectsLoop();
-        speed = Planet.inst.getPlanetSpeed();
+        speed = Planet.inst.getPlanetSpeed() / 50f;
         Invoke("slowStart", .5f);
 
         StartCoroutine(coRotUpdate());
@@ -51,26 +51,15 @@ public class PlayerTrail : MonoBehaviour
 
         while (true)
         {
-            var playerTrans = Player.inst.getPlayerHeadTrans();
-            /*
             
-            playerHeadObject.transform.LookAt(playerPos, Vector3.forward);
-            var _speed = speed;
-            if (speedLevel == 1)
-                _speed = 2f;
-            else if (speedLevel == 2)
-                _speed = 10f;
-
-
-
-            if (Vector3.Distance(playerHeadObject.transform.position, playerPos) > .06f)
+            if (GameManager.inst.isPlayerDied == true)
             {
-                playerHeadObject.transform.position = Vector3.MoveTowards(playerHeadObject.transform.position, playerPos, Time.smoothDeltaTime * _speed);
+                yield return null;
+                continue;
             }
-            */
-
-
-            //transform.position = Player.inst.getPlayerHead().transform.position;
+               
+            var playerTrans = Player.inst.getPlayerHeadTrans();
+  
             for (var x = 0; x <= maxBodyPieceCount; x++)
             {
 
@@ -136,12 +125,54 @@ public class PlayerTrail : MonoBehaviour
 
             yield return null;
         }
+
+       
        
     }
 
     void Update()
     {
-   
+
+    }
+
+    public void whenPlayerDie()
+    {
+
+        StartCoroutine(playerDieCo());
+    }
+
+    IEnumerator playerDieCo()
+    {
+        playerHeadObject.SetActive(false);
+        Instantiate(GameManager.inst.bodyBreakEffect, playerHeadObject.transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
+
+        yield return new WaitForSeconds(.05f);
+
+
+        for (var x = 0; x <= maxBodyPieceCount; x++)
+        {
+            bodyPices[x].transform.DOScale(0f, .3f);
+            yield return new WaitForSeconds(.08f);
+            Instantiate(GameManager.inst.bodyBreakEffect, bodyPices[x].transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
+            AudioManager.inst.playSFX(EnumsData.SFXEnum.bodyBreak);
+        }
+
+
+        for (var y = 0; y <= maxSlotCount; y++)
+        {
+            if (y >= maxBodyPieceCount)
+            {
+                bodySlots[y].transform.DOScale(0f, .3f);
+                yield return new WaitForSeconds(.08f);
+                AudioManager.inst.playSFX(EnumsData.SFXEnum.bodyBreak);
+
+            }
+
+        }
+
+
+        AudioManager.inst.playSFX(EnumsData.SFXEnum.fail);
+
     }
 
     void slowStart()

@@ -7,8 +7,8 @@ public class AudioManager : MonoBehaviour
 {
 
     public static AudioManager inst;
-    public AudioSource eatSFX, levelUpSFX, levelUp2SFX;
-
+    public AudioSource eatSFX, levelUpSFX, levelUp2SFX, bodyBreakSFX, failSFX;
+    public AudioSource inGameMusic, mainMenuMusic, gameOverMusic;
     private void Awake()
     {
         inst = this;
@@ -27,13 +27,39 @@ public class AudioManager : MonoBehaviour
         {
             levelUp2SFX.Play();
         }
-            
-        
+        else if (sfx == SFXEnum.bodyBreak)
+        {
+            bodyBreakSFX.Play();
+        }
+        else  if (sfx == SFXEnum.fail)
+        {
+            failSFX.Play();
+        }
+
     }
 
-    void playLevelUpSFX()
+
+    public void playMusic(MusicEnum music)
     {
-        levelUpSFX.Play();
-
+        if(music == MusicEnum.inGameMusic)
+        {
+            mainMenuMusic.Stop();
+            gameOverMusic.Stop();
+            inGameMusic.Play();
+        }
+        else if (music == MusicEnum.mainManuMusic)
+        {
+            inGameMusic.Stop();
+            gameOverMusic.Stop();
+            mainMenuMusic.Play();
+        }
+        else
+        {
+            inGameMusic.Stop();
+            mainMenuMusic.Stop();
+            gameOverMusic.Play();
+        }
     }
+
+
 }

@@ -40,6 +40,8 @@ public class Planet : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!GameManager.inst.isGameStarted || GameManager.inst.isPlayerDied)
+            return;
         var normalizeDir = joystick.Direction.normalized;
         var jVerical = normalizeDir.y;
         var jHorizontal = normalizeDir.x;

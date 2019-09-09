@@ -8,8 +8,9 @@ public class GameManager : MonoBehaviour
     private string currentScene;
     private int score;
     public int level;
-    public bool isLevelingUp;
+    public bool isLevelingUp, isGameStarted, isInProtection, isPlayerDied;
     private int bodySlotPerLevel;
+    public GameObject bodyBreakEffect, eatEffect, hitGroundEffect;
     private void Awake()
     {
         inst = this;
@@ -20,16 +21,38 @@ public class GameManager : MonoBehaviour
         currentScene = "MainMenu";
         bodySlotPerLevel = 5;
         Planet.inst.spawnEatable(bodySlotPerLevel + getExtraFoodLevel());
+        AudioManager.inst.playMusic(EnumsData.MusicEnum.mainManuMusic);
+
     }
+
 
     void Update()
     {
         
     }
 
+  
+    public void startPlayerProtection(float protectionTime = .6f)
+    {
+        isInProtection = true;
+        Invoke("stopPlayerProtection", protectionTime);
+
+
+    }
+
+    public void stopPlayerProtection()
+    {
+        isInProtection = false;
+
+    }
     public void startGame()
     {
         currentScene = "InGame";
+        isGameStarted = true;
+        AudioManager.inst.playMusic(EnumsData.MusicEnum.inGameMusic);
+        startPlayerProtection();
+
+
     }
 
     public void increaseScore()
@@ -40,6 +63,7 @@ public class GameManager : MonoBehaviour
 
     public void levelUp()
     {
+        startPlayerProtection(2f);
         level += 1;
         isLevelingUp = true;
         //1.Unattach the Trail from the Plant
@@ -90,4 +114,10 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
  
+    public void death()
+    {
+        isPlayerDied = true;
+        PlayerTrail.inst.whenPlayerDie();
+        AudioManager.inst.playMusic(EnumsData.MusicEnum.gameOverMusic);
+    }
 }
