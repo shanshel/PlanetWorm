@@ -7,13 +7,42 @@ public class AudioManager : MonoBehaviour
 {
 
     public static AudioManager inst;
-    public AudioSource eatSFX, levelUpSFX, levelUp2SFX, bodyBreakSFX, failSFX;
+    public AudioSource eatSFX, levelUpSFX, levelUp2SFX, bodyBreakSFX, failSFX, slapSFX, eatDangerSFX;
     public AudioSource inGameMusic, mainMenuMusic, gameOverMusic;
+    public AudioSource[] eatSFXs;
     private void Awake()
     {
         inst = this;
     }
 
+    int lastEatSFXIndex = 0;
+
+    public void playDangerEatSFX()
+    {
+        eatDangerSFX.Play();
+    }
+    public void playEatSFX(int comboCount)
+    {
+        
+        if (comboCount > 0)
+        {
+
+            eatSFXs[lastEatSFXIndex].Play();
+            lastEatSFXIndex++;
+            if (lastEatSFXIndex >= eatSFXs.Length)
+            {
+                lastEatSFXIndex = eatSFXs.Length-1;
+            }
+        }
+        else
+        {
+            eatSFX.Play();
+        }
+
+
+
+
+    }
     public void playSFX(SFXEnum sfx)
     {
 
@@ -41,6 +70,7 @@ public class AudioManager : MonoBehaviour
 
     public void playMusic(MusicEnum music)
     {
+
         if(music == MusicEnum.inGameMusic)
         {
             mainMenuMusic.Stop();

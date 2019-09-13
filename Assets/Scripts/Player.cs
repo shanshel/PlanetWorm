@@ -77,31 +77,7 @@ public class Player : MonoBehaviour
         return followPoint;
     }
 
-    public void whileLevelingUp()
-    {
-        StartCoroutine(updateFollowPointInLevelingUp());
-    }
 
-    IEnumerator updateFollowPointInLevelingUp()
-    {
-        yield return null;
-        
-        /*
-        var targetPos = new Vector3(playerHead.transform.position.x, playerHead.transform.position.y, playerHead.transform.position.z + 10f);
-        //targetPos = new Vector3(2f, 9f, 8f);
-        PlayerTrail.inst.setSpeedLevel(1);
-        yield return playerHead.transform.DOMove(targetPos, 1f).WaitForCompletion();
-        PlayerTrail.inst.setSpeedLevel(2);
-        //playerHead.transform.position = targetPos;
-        yield return new WaitForSeconds(.3f);
-        playerHead.transform.DOMove(playerHeadPos, .1f);
-        yield return new WaitForSeconds(.3f);
-        PlayerTrail.inst.setSpeedLevel(1);
 
-        yield return new WaitForSeconds(.4f);
-        PlayerTrail.inst.setSpeedLevel(0);
-        yield return null;
-        */
    
-    }
 }

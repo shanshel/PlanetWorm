@@ -11,9 +11,9 @@ public class UIManager : MonoBehaviour
     public static UIManager inst;
     [SerializeField]
     TextMeshProUGUI scoreText;
-    public Text bestScoreText;
+    public Text bestScoreText, comboText;
 
-    public Image mainMenuPanel;
+    public Image mainMenuPanel, gameOverPanel;
 
     // then where you want the Alpha setting
 
@@ -25,7 +25,6 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        
     }
 
     void Update()
@@ -41,21 +40,46 @@ public class UIManager : MonoBehaviour
     public void onPlayButtonClicked()
     {
         GameManager.inst.startGame();
-        mainMenuPanel.GetComponent<CanvasGroup>().DOFade(0, .6f);
-        Invoke("disableMainMenu", .6f);
-        //mainMenuPanel.GetComponent<CanvasGroup>().alpha = 0;
-
+        mainMenuPanel.GetComponent<CanvasGroup>().DOFade(0, .5f);
+        Invoke("toggleMainMenuScreen", .5f);
     }
 
-    private void disableMainMenu()
+    public void onPlayAgainButtonClicked()
     {
-        mainMenuPanel.gameObject.SetActive(false);
+
+        gameOverPanel.GetComponent<CanvasGroup>().DOFade(0, .5f);
+        Invoke("toggleGameOverScreen", .5f);
+        GameManager.inst.resetGame(true);
     }
 
-    private void enableMainMenu()
+    public void onBackToMainMenuFromInGme()
     {
-        mainMenuPanel.gameObject.SetActive(true);
+        gameOverPanel.GetComponent<CanvasGroup>().DOFade(0, .5f);
+        GameManager.inst.resetGame(false);
+    }
 
+   
+
+    public void onGameOver()
+    {
+        Invoke("onGameOverLate", 1.4f);
+    }
+
+    private void onGameOverLate()
+    {
+        toggleGameOverScreen();
+        gameOverPanel.GetComponent<CanvasGroup>().DOFade(1f, .5f);
+    }
+
+    private void toggleMainMenuScreen()
+    {
+
+        mainMenuPanel.gameObject.SetActive(!mainMenuPanel.gameObject.activeInHierarchy);
+    }
+
+    private void toggleGameOverScreen()
+    {
+        gameOverPanel.gameObject.SetActive(!gameOverPanel.gameObject.activeInHierarchy);
     }
 
 

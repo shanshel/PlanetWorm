@@ -10,29 +10,28 @@ public class PlayerTrail : MonoBehaviour
     private GameObject bodyPiece, slotPiece;
     [SerializeField]
     private int maxBodyPieceCount, maxSlotCount;
+    private int baseMaxBodyPieceCount, baseMaxSlotCount, trustedSlotCount;
     private bool isReachedMax;
-    private int lastMaxBodyPieceCount;
     public List<PlayerBodyPiece> bodyPices = new List<PlayerBodyPiece>();
     public List<GameObject> bodySlots = new List<GameObject>();
 
     private Transform playerPos;
     private GameObject playerHeadObject;
 
-
+    private Transform defaultBodySlotScale, defaultBodyPartScale;
     private void Awake()
     {
         inst = this;
     }
-    float speed;
     // Start is called before the first frame update
     void Start()
     {
+        baseMaxBodyPieceCount = maxBodyPieceCount;
+        baseMaxSlotCount = maxSlotCount;
+        trustedSlotCount = baseMaxBodyPieceCount;
+
         generateObjectsLoop();
-        speed = Planet.inst.getPlanetSpeed() / 50f;
-        Invoke("slowStart", .5f);
-
         StartCoroutine(coRotUpdate());
-
     }
 
     // Update is called once per frame
@@ -52,7 +51,7 @@ public class PlayerTrail : MonoBehaviour
         while (true)
         {
             
-            if (GameManager.inst.isPlayerDied == true)
+            if (Planet.inst.currentPlanetContainer == null)
             {
                 yield return null;
                 continue;
@@ -62,7 +61,10 @@ public class PlayerTrail : MonoBehaviour
   
             for (var x = 0; x <= maxBodyPieceCount; x++)
             {
-
+                if (Planet.inst.currentPlanetContainer == null)
+                {
+                    continue;
+                }
                 if (x == 0)
                 {
                     float distanceToHead = Vector3.Distance(playerHeadObject.transform.position, playerTrans.position);
@@ -101,7 +103,10 @@ public class PlayerTrail : MonoBehaviour
 
             for (var y = 0; y <= maxSlotCount; y++)
             {
-
+                if (Planet.inst.currentPlanetContainer == null)
+                {
+                    continue;
+                }
                 var currentBodyPart = bodySlots[y].transform;
                 var prevBodyPart = playerHeadObject.transform;
 
@@ -130,19 +135,39 @@ public class PlayerTrail : MonoBehaviour
        
     }
 
-    void Update()
-    {
-
-    }
-
     public void whenPlayerDie()
     {
-
         StartCoroutine(playerDieCo());
+    }
+
+    public void whenPlayResetGame()
+    {
+        maxBodyPieceCount = baseMaxBodyPieceCount;
+        maxSlotCount = baseMaxSlotCount;
+        trustedSlotCount = baseMaxBodyPieceCount;
+
+        playerHeadObject.SetActive(true);
+        for (var x = 0; x <= maxBodyPieceCount; x++)
+        {
+            bodyPices[x].transform.position = defaultBodyPartScale.position;
+            bodyPices[x].transform.localScale = defaultBodyPartScale.localScale;
+        }
+
+
+        for (var y = 0; y <= maxSlotCount; y++)
+        {
+            bodySlots[y].transform.position = defaultBodySlotScale.position;
+            bodySlots[y].transform.localScale = defaultBodySlotScale.localScale;
+        }
+
+        updateObjectsLoop();
+        
     }
 
     IEnumerator playerDieCo()
     {
+        AudioManager.inst.playSFX(EnumsData.SFXEnum.fail);
+
         playerHeadObject.SetActive(false);
         Instantiate(GameManager.inst.bodyBreakEffect, playerHeadObject.transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
 
@@ -151,33 +176,28 @@ public class PlayerTrail : MonoBehaviour
 
         for (var x = 0; x <= maxBodyPieceCount; x++)
         {
+            if (!GameManager.inst.isPlayerDied)
+                break;
             bodyPices[x].transform.DOScale(0f, .3f);
-            yield return new WaitForSeconds(.08f);
-            Instantiate(GameManager.inst.bodyBreakEffect, bodyPices[x].transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
             AudioManager.inst.playSFX(EnumsData.SFXEnum.bodyBreak);
+            Instantiate(GameManager.inst.bodyBreakEffect, bodyPices[x].transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
+
+            yield return new WaitForSeconds(.12f);
         }
 
 
         for (var y = 0; y <= maxSlotCount; y++)
         {
+            if (!GameManager.inst.isPlayerDied)
+                break;
             if (y >= maxBodyPieceCount)
             {
                 bodySlots[y].transform.DOScale(0f, .3f);
-                yield return new WaitForSeconds(.08f);
                 AudioManager.inst.playSFX(EnumsData.SFXEnum.bodyBreak);
-
+                Instantiate(GameManager.inst.bodyBreakEffect, bodySlots[y].transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
+                yield return new WaitForSeconds(.12f);
             }
-
         }
-
-
-        AudioManager.inst.playSFX(EnumsData.SFXEnum.fail);
-
-    }
-
-    void slowStart()
-    {
-        speed = Planet.inst.getPlanetSpeed() / 50f;
     }
 
     Vector3 savedPlayerPosition;
@@ -213,6 +233,10 @@ public class PlayerTrail : MonoBehaviour
             bodySlots.Add(bodySlotObject);
 
         }
+
+        defaultBodySlotScale = bodySlots[0].transform;
+        defaultBodyPartScale = bodyPices[0].transform;
+
 
         updateObjectsLoop();
     }
@@ -256,13 +280,52 @@ public class PlayerTrail : MonoBehaviour
     
     }
 
-    public void eatBall(Transform target)
+    float lastEat;
+    float comboWaitLength = 1f;
+    int comboCount;
+    int maxComboCount = 100;
+
+    public void eatBall(Transform target, int pointCount, bool addBodyPart = true)
     {
         if (isReachedMax) return;
-        ScreenEffects.inst.flashScreen(new Color(0.88f, 1f, 0.14f), 150f, .35f);
-        AudioManager.inst.playSFX(EnumsData.SFXEnum.eating);
-       
-        ScoreEffects.inst.doPointEffect(target);
+        if (lastEat > 0f && lastEat + comboWaitLength >= Time.time)
+        {
+            comboCount++;
+            if (comboCount > maxComboCount)
+                comboCount = maxComboCount;
+
+        }
+        else
+        {
+            comboCount = 0;
+        }
+
+        
+
+
+        lastEat = Time.time;
+   
+
+        if (pointCount < 0)
+        {
+            comboCount = 0;
+            lastEat = 0f;
+            ScreenEffects.inst.flashScreen(new Color(0.7f, .25f, .21f), 150f, .35f);
+            AudioManager.inst.playDangerEatSFX();
+        }
+        else
+        {
+            ScreenEffects.inst.flashScreen(new Color(0.88f, 1f, 0.14f), 150f, .35f);
+
+            AudioManager.inst.playEatSFX(comboCount);
+
+        }
+
+        ScoreEffects.inst.doPointEffect(target, comboCount, pointCount);
+
+        if (!addBodyPart)
+            return;
+
         maxBodyPieceCount += 1;
 
    
@@ -275,14 +338,21 @@ public class PlayerTrail : MonoBehaviour
    
     }
 
+
     public void setSlotCount(int count)
     {
         maxSlotCount = count;
+        trustedSlotCount = count;
     }
 
     public int getSlotCount()
     {
-        return maxSlotCount;
+        return trustedSlotCount;
+    }
+
+    public int getCurrentBodyCount()
+    {
+        return maxBodyPieceCount;
     }
 
     public void prepareTrailForLevel()

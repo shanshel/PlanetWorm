@@ -9,7 +9,7 @@ public class Planet : MonoBehaviour
     [SerializeField]
     private Joystick joystick;
     [SerializeField]
-    public GameObject eatablePrefab, currentPlanetContainer, trailContainer;
+    public GameObject currentPlanetContainer, trailContainer;
 
     public List<GameObject> planets;
     public List<PlanetPlaceHolder> planetsPlaceholders;
@@ -28,6 +28,7 @@ public class Planet : MonoBehaviour
         trailContainer = currentPlanetContainer.transform.Find("TrailContainer").gameObject;
     }
 
+  
     public Vector3 getLastDir()
     {
         return lastDir;
@@ -40,11 +41,19 @@ public class Planet : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.inst.isGameStarted || GameManager.inst.isPlayerDied)
+        if (!GameManager.inst.isGameStarted)
             return;
+    
         var normalizeDir = joystick.Direction.normalized;
         var jVerical = normalizeDir.y;
         var jHorizontal = normalizeDir.x;
+
+        var usedSpeed = currentMoveSpeed;
+
+        if (GameManager.inst.isPlayerDied)
+        {
+            usedSpeed = 10f;
+        }
 
         if ((jVerical == 0 && jHorizontal == 0))
         {
@@ -55,45 +64,16 @@ public class Planet : MonoBehaviour
             }
             jVerical = lastDir.y;
             jHorizontal = lastDir.x;
-            currentPlanetContainer.transform.Rotate(-jVerical * (Time.deltaTime * Time.timeScale) * currentMoveSpeed, jHorizontal * (Time.deltaTime * Time.timeScale) * currentMoveSpeed, 0f, Space.World);
+            currentPlanetContainer.transform.Rotate(-jVerical * (Time.deltaTime * Time.timeScale) * usedSpeed, jHorizontal * (Time.deltaTime * Time.timeScale) * usedSpeed, 0f, Space.World);
         }
         else
         {
-            currentPlanetContainer.transform.Rotate(-jVerical * (Time.deltaTime * Time.timeScale) * currentMoveSpeed, jHorizontal * (Time.deltaTime * Time.timeScale) * currentMoveSpeed, 0f, Space.World);
+            currentPlanetContainer.transform.Rotate(-jVerical * (Time.deltaTime * Time.timeScale) * usedSpeed, jHorizontal * (Time.deltaTime * Time.timeScale) * usedSpeed, 0f, Space.World);
             lastDir = normalizeDir;
         }
 
     }
 
-
-
-    public void spawnEatable(int count)
-    {
-        var spawnedEatable = new Vector3[count];
-        var i = 0;
-
-        while (i < count)
-        {
-            var rand = Random.onUnitSphere * .95f;
-            bool canSpawn = true;
-            for (var x = 0; x < spawnedEatable.Length; x++)
-            {
-                if (Vector3.Distance(rand, spawnedEatable[x]) < .5f)
-                {
-                    canSpawn = false;
-                }
-            }
-            if (canSpawn)
-            {
-                Vector3 spawnPosition = rand * (.5f + 1.3f * 0.5f) + currentPlanetContainer.transform.position;
-                GameObject newCharacter = Instantiate(eatablePrefab, spawnPosition, Quaternion.identity, currentPlanetContainer.transform);
-                newCharacter.transform.LookAt(currentPlanetContainer.transform.position);
-                spawnedEatable[i] = rand;
-                i++;
-            }
-        }
-
-    }
 
     public GameObject getCurrentPlanetContainer()
     {
@@ -154,7 +134,6 @@ public class Planet : MonoBehaviour
     {
  
         updateInnerLevelInfo(GameManager.inst.level);
-        Debug.Log(_innerLevel + " " + _nextInnerLevel +  " " +_nextNextInnerLevel);
         planetsPlaceholders[_innerLevel].gameObject.SetActive(false);
         currentPlanetContainer = Instantiate(planets[_innerLevel], planetsPlaceholders[_innerLevel].transform.position, Quaternion.identity, transform);
         currentPlanetContainer.transform.DOMove(Vector3.zero, 2f);
@@ -184,5 +163,26 @@ public class Planet : MonoBehaviour
 
     }
     
-  
+    public void onResetGame()
+    {
+
+ 
+
+       
+       
+
+    
+
+        //Invoke("onResetGameLate", .5f);
+
+
+    }
+
+    public void onResetGameLate()
+    {
+       
+    }
+
+
+
 }

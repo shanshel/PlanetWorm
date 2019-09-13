@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public bool isLevelingUp, isGameStarted, isInProtection, isPlayerDied;
     private int bodySlotPerLevel;
     public GameObject bodyBreakEffect, eatEffect, hitGroundEffect;
+    public float timeWhenLevelUp;
     private void Awake()
     {
         inst = this;
@@ -18,11 +19,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        currentScene = "MainMenu";
         bodySlotPerLevel = 5;
-        Planet.inst.spawnEatable(bodySlotPerLevel + getExtraFoodLevel());
         AudioManager.inst.playMusic(EnumsData.MusicEnum.mainManuMusic);
-
     }
 
 
@@ -36,28 +34,58 @@ public class GameManager : MonoBehaviour
     {
         isInProtection = true;
         Invoke("stopPlayerProtection", protectionTime);
-
-
     }
 
     public void stopPlayerProtection()
     {
         isInProtection = false;
-
     }
+
     public void startGame()
     {
-        currentScene = "InGame";
+        EatableManager.inst.onGameStart();
         isGameStarted = true;
+        StartCoroutine(prepareLevel());
+
+
+        
+
         AudioManager.inst.playMusic(EnumsData.MusicEnum.inGameMusic);
         startPlayerProtection();
-
-
     }
 
-    public void increaseScore()
+    public void resetGame(bool playAgain)
     {
-        score += 1;
+   
+        PlayerTrail.inst.whenPlayResetGame();
+
+        level = 0;
+        score = 0;
+        isLevelingUp = false;
+        isInProtection = false;
+
+        if (playAgain)
+        {
+            isPlayerDied = false;
+            isLevelingUp = true;
+            
+            //2.Move the Planet toward behind of the camera 
+            Planet.inst.moveActivePlanetBehindCamera();
+            //3. Move the next Planet to the default location 
+            Planet.inst.spawnNextPlanet();
+
+            Invoke("attachPlayerTrailToActivePlanet", 1.8f);
+            Invoke("endLevelingUp", 1.9f);
+
+            startGame();
+            Planet.inst.onResetGame();
+            
+        }
+    }
+
+    public void increaseScore(int point = 1)
+    {
+        score += point;
         UIManager.inst.setScore(score);
     }
 
@@ -66,9 +94,6 @@ public class GameManager : MonoBehaviour
         startPlayerProtection(2f);
         level += 1;
         isLevelingUp = true;
-        //1.Unattach the Trail from the Plant
-        //Planet.inst.getTrailContainerTransform().SetParent(Planet.inst.transform);
-        Player.inst.whileLevelingUp();
         //2.Move the Planet toward behind of the camera 
         Planet.inst.moveActivePlanetBehindCamera();
         //3. Move the next Planet to the default location 
@@ -96,10 +121,20 @@ public class GameManager : MonoBehaviour
         return level * 2;
     }
 
+    private int getExtraSlotLevel()
+    {
+        return (level + 1) * 2;
+    }
+
     IEnumerator prepareLevel()
     {
-        Planet.inst.spawnEatable(bodySlotPerLevel + getExtraFoodLevel());
-        PlayerTrail.inst.setSlotCount(PlayerTrail.inst.getSlotCount() + bodySlotPerLevel + getExtraFoodLevel());
+        var eatableCount = bodySlotPerLevel + getExtraFoodLevel();
+        Debug.Log("Level: " + level + " - Slot: " + (PlayerTrail.inst.getSlotCount() + eatableCount) + " - Eat: " + eatableCount);
+
+        EatableManager.inst.spawnEatable(eatableCount);
+        PlayerTrail.inst.setSlotCount( PlayerTrail.inst.getSlotCount() + eatableCount ) ;
+
+
         PlayerTrail.inst.prepareTrailForLevel();
 
 
@@ -118,6 +153,8 @@ public class GameManager : MonoBehaviour
     {
         isPlayerDied = true;
         PlayerTrail.inst.whenPlayerDie();
+        UIManager.inst.onGameOver();
+
         AudioManager.inst.playMusic(EnumsData.MusicEnum.gameOverMusic);
     }
 }

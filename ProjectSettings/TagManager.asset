@@ -14,9 +14,9 @@ TagManager:
   - 
   - 
   - PostProccess
-  - Worm
-  - 
-  - 
+  - WormBody
+  - WormHead
+  - WormSmallHead
   - 
   - 
   - 
