@@ -22,7 +22,7 @@ public class EatableMargin : MonoBehaviour
         baseScale = parent.transform.localScale;
         parent.transform.localScale.Set(0f, 0f, 0f);
         parent.transform.DOScale(baseScale.x, .8f);
-        Invoke("lateStart", .8f);
+        Invoke("lateStart", .4f);
 
         pointText.text = "+" + eatPoint;
         if (type == EatableType.danger)
@@ -50,7 +50,7 @@ public class EatableMargin : MonoBehaviour
 
         if (other.name == "BigHeadCollider")
         {
-            GetComponent<SphereCollider>().enabled = false;
+            _spCollider.enabled = false;
             Instantiate(GameManager.inst.eatEffect, parent.transform.position, Quaternion.identity, Planet.inst.currentPlanetContainer.transform);
 
             StartCoroutine(eatEffect());

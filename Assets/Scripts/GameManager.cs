@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager inst;
     private string currentScene;
-    private int score;
+    private int score, maxCombo;
     public int level;
     public bool isLevelingUp, isGameStarted, isInProtection, isPlayerDied;
     private int bodySlotPerLevel;
@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 100;
         bodySlotPerLevel = 5;
         AudioManager.inst.playMusic(EnumsData.MusicEnum.mainManuMusic);
     }
@@ -51,7 +52,7 @@ public class GameManager : MonoBehaviour
         
 
         AudioManager.inst.playMusic(EnumsData.MusicEnum.inGameMusic);
-        startPlayerProtection();
+        startPlayerProtection(1.2f);
     }
 
     public void resetGame(bool playAgain)
@@ -61,9 +62,10 @@ public class GameManager : MonoBehaviour
 
         level = 0;
         score = 0;
+        maxCombo = 0;
         isLevelingUp = false;
         isInProtection = false;
-
+        
         if (playAgain)
         {
             isPlayerDied = false;
@@ -91,7 +93,7 @@ public class GameManager : MonoBehaviour
 
     public void levelUp()
     {
-        startPlayerProtection(2f);
+        startPlayerProtection(2.5f);
         level += 1;
         isLevelingUp = true;
         //2.Move the Planet toward behind of the camera 
@@ -149,12 +151,53 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
  
+    public void updateMaxCombo(int currentCombo)
+    {
+        if (currentCombo > maxCombo)
+        {
+            maxCombo = currentCombo;
+        }
+    }
     public void death()
     {
+        if (!isGameStarted)
+            return;
+        StartCoroutine(saveMatchInfoCorot());
+
         isPlayerDied = true;
         PlayerTrail.inst.whenPlayerDie();
         UIManager.inst.onGameOver();
 
         AudioManager.inst.playMusic(EnumsData.MusicEnum.gameOverMusic);
     }
+
+    IEnumerator saveMatchInfoCorot()
+    {
+        
+        var newScore = score;
+        var newMaxCombo = maxCombo;
+        var newLevel = level;
+
+        UIManager.inst.setGameOverScreenInfo(newScore, newMaxCombo, newLevel);
+
+        var oldScore = PlayerPrefs.GetInt("topScore", 0);
+
+        var oldMaxCombo = PlayerPrefs.GetInt("topCombo", 0);
+
+        var oldLevel = PlayerPrefs.GetInt("topLevel", 0);
+
+       
+        if (newScore > oldScore)
+            PlayerPrefs.SetInt("topScore", newScore);
+
+        if (newMaxCombo > oldMaxCombo)
+            PlayerPrefs.SetInt("topCombo", newMaxCombo);
+
+        if (newLevel > oldLevel)
+            PlayerPrefs.SetInt("topLevel", newLevel);
+
+        
+        yield return null;
+    }
+
 }

@@ -7,7 +7,9 @@ public class PlayerTrail : MonoBehaviour
 
     public static PlayerTrail inst;
     [SerializeField]
-    private GameObject bodyPiece, slotPiece;
+    private PlayerBodyPiece bodyPiece;
+    [SerializeField]
+    private GameObject slotPiece;
     [SerializeField]
     private int maxBodyPieceCount, maxSlotCount;
     private int baseMaxBodyPieceCount, baseMaxSlotCount, trustedSlotCount;
@@ -216,10 +218,10 @@ public class PlayerTrail : MonoBehaviour
 
             if (x < maxBodyPieceCount)
             {
-                gobject.SetActive(true);
+                gobject.gameObject.SetActive(true);
             }
-            var gameObject = gobject.GetComponent<PlayerBodyPiece>();
-            bodyPices.Add(gameObject);
+
+            bodyPices.Add(gobject);
 
 
 
@@ -245,6 +247,10 @@ public class PlayerTrail : MonoBehaviour
     {
         for (var x = 0; x < bodyPices.Count; x++)
         {
+            if (x < 3)
+            {
+                bodyPices[x].toggleCollider(false);
+            }
             if (x < maxBodyPieceCount)
             {
                 if (eating && (x+1 == maxBodyPieceCount))
@@ -281,7 +287,7 @@ public class PlayerTrail : MonoBehaviour
     }
 
     float lastEat;
-    float comboWaitLength = 1f;
+    float comboWaitLength = 3f;
     int comboCount;
     int maxComboCount = 100;
 
@@ -321,11 +327,13 @@ public class PlayerTrail : MonoBehaviour
 
         }
 
+        GameManager.inst.updateMaxCombo(comboCount);
         ScoreEffects.inst.doPointEffect(target, comboCount, pointCount);
 
         if (!addBodyPart)
             return;
-
+      
+  
         maxBodyPieceCount += 1;
 
    

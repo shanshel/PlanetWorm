@@ -6,7 +6,9 @@ public class PlayerBodyPiece : MonoBehaviour
 {
     [SerializeField]
     float gettingSmallerSpeed, timeOffset;
-  
+
+    [SerializeField]
+    SphereCollider _shpereCollider;
 
     float currentTimer;
 
@@ -42,7 +44,7 @@ public class PlayerBodyPiece : MonoBehaviour
     }
     public void setScale(int index, int maxIndex)
     {
-
+        transform.localScale = baseScale;
         var deltaScale = getDeltaScale(index, maxIndex);
         transform.localScale = new Vector3(baseScale.x + deltaScale, baseScale.y + deltaScale, baseScale.z + deltaScale);
     }
@@ -57,5 +59,10 @@ public class PlayerBodyPiece : MonoBehaviour
         isShrinking = false;
         currentTimer = 0f;
         transform.localScale = baseScale;
+    }
+
+    public void toggleCollider(bool enabled)
+    {
+        _shpereCollider.enabled = enabled;
     }
 }

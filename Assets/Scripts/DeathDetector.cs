@@ -13,12 +13,9 @@ public class DeathDetector : MonoBehaviour
             )
             return;
 
-        if (other.name == "BodySphere")
-        {
-            GameManager.inst.death();
-        }
-    
-       
+        GameManager.inst.death();
+
+
 
 
     }

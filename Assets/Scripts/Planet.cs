@@ -14,7 +14,9 @@ public class Planet : MonoBehaviour
     public List<GameObject> planets;
     public List<PlanetPlaceHolder> planetsPlaceholders;
     private Vector3 lastDir;
-    private float currentMoveSpeed = 120f;
+
+    [SerializeField]
+    private float currentMoveSpeed = 50f, maxMoveSpeed = 130f, additnalMoveSpeedPerLevel = 5f;
     private GameObject oldPlanet;
 
 
@@ -48,7 +50,11 @@ public class Planet : MonoBehaviour
         var jVerical = normalizeDir.y;
         var jHorizontal = normalizeDir.x;
 
-        var usedSpeed = currentMoveSpeed;
+        var usedSpeed = currentMoveSpeed + (additnalMoveSpeedPerLevel * GameManager.inst.level);
+        if (usedSpeed > maxMoveSpeed)
+        {
+            usedSpeed = maxMoveSpeed;
+        }
 
         if (GameManager.inst.isPlayerDied)
         {

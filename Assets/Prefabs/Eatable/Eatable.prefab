@@ -215,6 +215,7 @@ GameObject:
   - component: {fileID: 1407008202576613377}
   - component: {fileID: 2595777115212718401}
   - component: {fileID: 3627831366774588137}
+  - component: {fileID: -907811798374232304}
   m_Layer: 0
   m_Name: Eatable
   m_TagString: Untagged
@@ -283,6 +284,22 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!54 &-907811798374232304
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5000552821336361838}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &6718798675303796723
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,3 +370,4 @@ MonoBehaviour:
   type: 0
   _spCollider: {fileID: 6215539040567823582}
   pointText: {fileID: 7908636772875113332}
+  eatPoint: 1

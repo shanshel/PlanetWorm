@@ -61,7 +61,7 @@ public class EatableManager : MonoBehaviour
             for (var x = 0; x < eatableList.Count; x++)
             {
                 eatableList[x].GetComponentInChildren<EatableMargin>()._spCollider.enabled = false;
-                eatableList[x].transform.DOScale(0f, .7f);
+                eatableList[x].transform.DOScale(0f, .5f);
             }
         }
         else

@@ -34,7 +34,6 @@ public class Player : MonoBehaviour
     {
         if (!GameManager.inst.isGameStarted)
         {
-
             playerHead.transform.position = Vector3.MoveTowards(playerHead.transform.position , playerHeadMainMenuPos, Time.smoothDeltaTime);
             return;
         }
