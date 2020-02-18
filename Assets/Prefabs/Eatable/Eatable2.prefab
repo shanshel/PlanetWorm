@@ -216,7 +216,8 @@ GameObject:
   - component: {fileID: 2595777115212718401}
   - component: {fileID: 3627831366774588137}
   - component: {fileID: -8340341177635795088}
-  m_Layer: 0
+  - component: {fileID: 1588735534488134232}
+  m_Layer: 14
   m_Name: Eatable2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -256,7 +257,7 @@ MeshRenderer:
   m_GameObject: {fileID: 5000552821336361838}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
@@ -300,6 +301,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1588735534488134232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5000552821336361838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75b23a5a838f8c8428f4e002865fc565, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  childFood: {fileID: 0}
+  type: 1
+  _spCollider: {fileID: 6215539040567823582}
+  pointText: {fileID: 7908636772875113332}
+  eatPoint: 10
 --- !u!1 &6718798675303796723
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,7 +329,6 @@ GameObject:
   - component: {fileID: 8704366825826312287}
   - component: {fileID: 1919484546549236534}
   - component: {fileID: 6215539040567823582}
-  - component: {fileID: 855293026433160758}
   m_Layer: 0
   m_Name: Food
   m_TagString: Untagged
@@ -354,20 +371,3 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &855293026433160758
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6718798675303796723}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75b23a5a838f8c8428f4e002865fc565, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parent: {fileID: 5000552821336361838}
-  type: 1
-  _spCollider: {fileID: 6215539040567823582}
-  pointText: {fileID: 7908636772875113332}
-  eatPoint: 10

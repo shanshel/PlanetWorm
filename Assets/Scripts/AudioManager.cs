@@ -13,6 +13,15 @@ public class AudioManager : MonoBehaviour
     private void Awake()
     {
         inst = this;
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
     }
 
     int lastEatSFXIndex = 0;

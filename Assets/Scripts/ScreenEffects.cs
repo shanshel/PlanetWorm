@@ -10,27 +10,32 @@ public class ScreenEffects : MonoBehaviour
     Bloom bloomLayer = null;
     PostProcessVolume volume;
     Vignette _vignette;
-    Camera mainCamera;
+    public Camera mainCamera;
     Color cameraBackColor;
-
+    float baseBloomValue; 
     private void Awake()
     {
         inst = this;
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
     }
-    void Start()
+    
+
+    public void onLoadGame()
     {
 
-        mainCamera = Camera.main;
         cameraBackColor = mainCamera.backgroundColor;
         PostProcessVolume volume = mainCamera.GetComponentInChildren<PostProcessVolume>();
         volume.profile.TryGetSettings(out bloomLayer);
-        volume.profile.TryGetSettings(out _vignette);
-
-        
-       
-
-
-
+        //volume.profile.TryGetSettings(out _vignette);
+        baseBloomValue = bloomLayer.intensity.value;
     }
 
     Color flashColor;
@@ -43,7 +48,7 @@ public class ScreenEffects : MonoBehaviour
     {
         isFlashing = false;
         mainCamera.backgroundColor = cameraBackColor;
-        bloomLayer.intensity.value = 14f;
+        bloomLayer.intensity.value = baseBloomValue;
         flashColor = color;
         flashMoveTowardSpeed = _speed;
         flashBackgroundLerpTime = _lerp;
@@ -52,7 +57,7 @@ public class ScreenEffects : MonoBehaviour
 
     public void setVignette(float intinsity = .6f)
     {
-        _vignette.intensity.value = intinsity;
+       // _vignette.intensity.value = intinsity;
     }
 
 
@@ -67,15 +72,15 @@ public class ScreenEffects : MonoBehaviour
         {
             mainCamera.backgroundColor = Color.Lerp(mainCamera.backgroundColor, flashColor, flashBackgroundLerpTime);
 
-            bloomLayer.intensity.value = Mathf.MoveTowards(bloomLayer.intensity.value, 60f, Time.deltaTime * flashMoveTowardSpeed);
-            if (bloomLayer.intensity.value >= 60f)
+            bloomLayer.intensity.value = Mathf.MoveTowards(bloomLayer.intensity.value, 12f, Time.deltaTime * flashMoveTowardSpeed);
+            if (bloomLayer.intensity.value >= 12f)
                 isFlashing = false;
         }
         else
         {
             mainCamera.backgroundColor = Color.Lerp(mainCamera.backgroundColor, cameraBackColor, .8f);
 
-            bloomLayer.intensity.value = Mathf.MoveTowards(bloomLayer.intensity.value, 14f, Time.deltaTime * 40f);
+            bloomLayer.intensity.value = Mathf.MoveTowards(bloomLayer.intensity.value, baseBloomValue, Time.deltaTime * 40f);
         }
 
     }

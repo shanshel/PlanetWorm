@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7692677544345648441}
   - component: {fileID: 7692677544345648440}
   - component: {fileID: 7692677544345648443}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: EatEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}

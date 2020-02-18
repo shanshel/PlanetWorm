@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using EasyMobile;
 
 public class UIManager : MonoBehaviour
 {
@@ -21,19 +22,32 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         inst = this;
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
+
     }
 
-    void Start()
+    private void Update()
+    {
+        
+    }
+
+
+    public void onLoadGame()
     {
         bestScoreText.text = PlayerPrefs.GetInt("topScore", 0).ToString();
         bestComboText.text = PlayerPrefs.GetInt("topCombo", 0).ToString();
         bestLevelText.text = PlayerPrefs.GetInt("topLevel", 0).ToString();
     }
 
-    void Update()
-    {
-        
-    }
+  
 
     public void setScore(int score)
     {
@@ -60,13 +74,20 @@ public class UIManager : MonoBehaviour
         GameManager.inst.resetGame(true);
     }
 
+    bool onBackToMainMenuFromInGme_click = false;
     public void onBackToMainMenuFromInGme()
     {
+        
+        if (onBackToMainMenuFromInGme_click) return;
+        onBackToMainMenuFromInGme_click = true;
+        toggleMainMenuScreen();
+        toggleGameOverScreen();
         gameOverPanel.GetComponent<CanvasGroup>().DOFade(0, .5f);
+        mainMenuPanel.GetComponent<CanvasGroup>().DOFade(1, .5f);
         GameManager.inst.resetGame(false);
     }
 
-   
+
 
     public void onGameOver()
     {
@@ -84,6 +105,7 @@ public class UIManager : MonoBehaviour
 
         mainMenuPanel.gameObject.SetActive(!mainMenuPanel.gameObject.activeInHierarchy);
         onPlayButtonClicked_click = false;
+        onBackToMainMenuFromInGme_click = false;
     }
 
     private void toggleGameOverScreen()
@@ -99,6 +121,16 @@ public class UIManager : MonoBehaviour
         yourScoreText.text = score.ToString();
         yourComboText.text = combo.ToString();
         yourLevelText.text = level.ToString();
+    }
+
+
+    public void onScoreButtonClicked()
+    {
+        // Check for initialization before showing leaderboard UI
+        if (GameServices.IsInitialized())
+        {
+            GameServices.ShowLeaderboardUI();
+        }
     }
 
 

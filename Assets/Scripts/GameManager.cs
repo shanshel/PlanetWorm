@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using EasyMobile;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,25 +13,47 @@ public class GameManager : MonoBehaviour
     private int bodySlotPerLevel;
     public GameObject bodyBreakEffect, eatEffect, hitGroundEffect;
     public float timeWhenLevelUp;
+    private bool playedBeforeInCurrentSession = false;
+    public int requiredEatCountForNextLevel;
+    public int totalEatedCount = 0;
     private void Awake()
     {
+        
         inst = this;
+        //GameAnalytics.Initialize();
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
+
     }
 
     void Start()
     {
         Application.targetFrameRate = 100;
         bodySlotPerLevel = 5;
-        AudioManager.inst.playMusic(EnumsData.MusicEnum.mainManuMusic);
+        StartCoroutine(loadGame());
     }
 
-
-    void Update()
+    IEnumerator loadGame()
     {
-        
+
+        AudioManager.inst.playMusic(EnumsData.MusicEnum.mainManuMusic);
+        yield return null;
+        UIManager.inst.onLoadGame();
+        yield return null;
+        PlayerTrail.inst.onLoadGame();
+        yield return null; 
+        ScreenEffects.inst.onLoadGame();
     }
 
-  
+
+
     public void startPlayerProtection(float protectionTime = .6f)
     {
         isInProtection = true;
@@ -44,33 +67,12 @@ public class GameManager : MonoBehaviour
 
     public void startGame()
     {
-        EatableManager.inst.onGameStart();
-        isGameStarted = true;
-        StartCoroutine(prepareLevel());
-
-
-        
-
-        AudioManager.inst.playMusic(EnumsData.MusicEnum.inGameMusic);
-        startPlayerProtection(1.2f);
-    }
-
-    public void resetGame(bool playAgain)
-    {
-   
-        PlayerTrail.inst.whenPlayResetGame();
-
-        level = 0;
-        score = 0;
-        maxCombo = 0;
-        isLevelingUp = false;
-        isInProtection = false;
-        
-        if (playAgain)
+        TinySauce.OnGameStarted();
+ 
+        if (playedBeforeInCurrentSession)
         {
             isPlayerDied = false;
             isLevelingUp = true;
-            
             //2.Move the Planet toward behind of the camera 
             Planet.inst.moveActivePlanetBehindCamera();
             //3. Move the next Planet to the default location 
@@ -79,10 +81,47 @@ public class GameManager : MonoBehaviour
             Invoke("attachPlayerTrailToActivePlanet", 1.8f);
             Invoke("endLevelingUp", 1.9f);
 
-            startGame();
-            Planet.inst.onResetGame();
-            
+      
+    
         }
+
+        EatableManager.inst.onGameStart();
+        isGameStarted = true;
+        StartCoroutine(prepareLevel());
+
+
+        
+
+        AudioManager.inst.playMusic(EnumsData.MusicEnum.inGameMusic);
+        startPlayerProtection(1.8f);
+        //GameAnalytics.NewProgressionEvent(GAProgressionStatus.Start, Application.version, "game");
+
+        if (playedBeforeInCurrentSession)
+        {
+            Planet.inst.onResetGame();
+        }
+    }
+
+    public void resetGame(bool playAgain)
+    {
+   
+        PlayerTrail.inst.whenPlayResetGame();
+
+        totalEatedCount = 0;
+        level = 0;
+       
+
+        score = 0;
+        maxCombo = 0;
+        isLevelingUp = false;
+        isInProtection = false;
+        UIManager.inst.setScore(score);
+        playedBeforeInCurrentSession = true;
+        if (playAgain)
+        {
+            startGame();
+        }
+   
     }
 
     public void increaseScore(int point = 1)
@@ -105,7 +144,6 @@ public class GameManager : MonoBehaviour
         //
         Invoke("attachPlayerTrailToActivePlanet", 1.8f);
         Invoke("endLevelingUp", 1.9f);
-
     }
 
     private void attachPlayerTrailToActivePlanet()
@@ -130,11 +168,32 @@ public class GameManager : MonoBehaviour
 
     IEnumerator prepareLevel()
     {
-        var eatableCount = bodySlotPerLevel + getExtraFoodLevel();
-        Debug.Log("Level: " + level + " - Slot: " + (PlayerTrail.inst.getSlotCount() + eatableCount) + " - Eat: " + eatableCount);
+        var slotPerLevel = bodySlotPerLevel + getExtraFoodLevel();
+        int slotCountUsed = PlayerTrail.inst.getSlotCount() + slotPerLevel;
+      
 
-        EatableManager.inst.spawnEatable(eatableCount);
-        PlayerTrail.inst.setSlotCount( PlayerTrail.inst.getSlotCount() + eatableCount ) ;
+        if (slotCountUsed > PlayerTrail.inst.bodyPices.Length)
+        {
+            slotCountUsed = PlayerTrail.inst.bodyPices.Length;
+            requiredEatCountForNextLevel += 30;
+        }
+        else
+        {
+            requiredEatCountForNextLevel = slotCountUsed;
+        }
+
+        int spawnCount = requiredEatCountForNextLevel - totalEatedCount;
+        if (level == 0)
+        {
+            totalEatedCount = PlayerTrail.inst.getBaseBodyCount();
+            spawnCount = requiredEatCountForNextLevel - totalEatedCount;
+        }
+
+  
+
+        EatableManager.inst.spawnEatable(spawnCount);
+
+        PlayerTrail.inst.setSlotCount(slotCountUsed) ;
 
 
         PlayerTrail.inst.prepareTrailForLevel();
@@ -149,6 +208,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1.75f);
         ScreenEffects.inst.setVignette(0.494f);
         yield return null;
+       
     }
  
     public void updateMaxCombo(int currentCombo)
@@ -160,6 +220,8 @@ public class GameManager : MonoBehaviour
     }
     public void death()
     {
+        TinySauce.OnGameFinished(score);
+        //GameAnalytics.NewProgressionEvent(GAProgressionStatus.Complete, Application.version, "game", score);
         if (!isGameStarted)
             return;
         StartCoroutine(saveMatchInfoCorot());
@@ -177,7 +239,7 @@ public class GameManager : MonoBehaviour
         var newScore = score;
         var newMaxCombo = maxCombo;
         var newLevel = level;
-
+        GameServices.ReportScore(newScore, EM_GameServicesConstants.Leaderboard_HighScore);
         UIManager.inst.setGameOverScreenInfo(newScore, newMaxCombo, newLevel);
 
         var oldScore = PlayerPrefs.GetInt("topScore", 0);

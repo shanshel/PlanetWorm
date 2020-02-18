@@ -23,11 +23,21 @@ public class Planet : MonoBehaviour
     private void Awake()
     {
         inst = this;
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
     }
     // Start is called before the first frame update
-    void Start()
+
+    public void onLoadGame()
     {
-        trailContainer = currentPlanetContainer.transform.Find("TrailContainer").gameObject;
+
     }
 
   
@@ -41,11 +51,66 @@ public class Planet : MonoBehaviour
         return currentMoveSpeed;
     }
     // Update is called once per frame
+
+
+    float jUsedSpeed;
+    Vector2 jNormlized;
+    private void FixedUpdate()
+    {
+    
+        var usedSpeed = currentMoveSpeed + (additnalMoveSpeedPerLevel * GameManager.inst.level);
+        if (usedSpeed > maxMoveSpeed)
+        {
+            usedSpeed = maxMoveSpeed;
+        }
+        if (GameManager.inst.level > 1)
+        {
+            usedSpeed += 10f;
+        }
+        if (GameManager.inst.isPlayerDied)
+        {
+            usedSpeed = 10f;
+        }
+    
+
+
+        if ((jNormlized.y == 0 && jNormlized.x == 0))
+        {
+            if (lastDir.x == 0f && lastDir.y == 0f)
+            {
+                jNormlized.y = -1;
+            }
+            else
+            {
+                jNormlized = lastDir;
+            }
+            currentPlanetContainer.transform.Rotate(-jNormlized.y * (Time.deltaTime * Time.timeScale) * usedSpeed, jNormlized.x * (Time.deltaTime * Time.timeScale) * usedSpeed, 0f, Space.World);
+        }
+
+        else
+        {
+            if (Vector2.Distance(lastDir, jNormlized) > .1f)
+            {
+                usedSpeed += 15f;
+            }
+            currentPlanetContainer.transform.Rotate(-jNormlized.y * (Time.deltaTime * Time.timeScale) * usedSpeed, jNormlized.x * (Time.deltaTime * Time.timeScale) * usedSpeed, 0f, Space.World);
+            lastDir = jNormlized;
+        }
+
+
+    }
+
     void Update()
     {
         if (!GameManager.inst.isGameStarted)
             return;
-    
+
+
+        jNormlized = joystick.Direction.normalized;
+
+
+        /*
+
         var normalizeDir = joystick.Direction.normalized;
         var jVerical = normalizeDir.y;
         var jHorizontal = normalizeDir.x;
@@ -72,12 +137,18 @@ public class Planet : MonoBehaviour
             jHorizontal = lastDir.x;
             currentPlanetContainer.transform.Rotate(-jVerical * (Time.deltaTime * Time.timeScale) * usedSpeed, jHorizontal * (Time.deltaTime * Time.timeScale) * usedSpeed, 0f, Space.World);
         }
+  
         else
         {
+            if (Vector2.Distance(new Vector2(lastDir.x, lastDir.y), normalizeDir) > .05f)
+            {
+                usedSpeed += 40f;
+            }
             currentPlanetContainer.transform.Rotate(-jVerical * (Time.deltaTime * Time.timeScale) * usedSpeed, jHorizontal * (Time.deltaTime * Time.timeScale) * usedSpeed, 0f, Space.World);
             lastDir = normalizeDir;
         }
-
+        
+        */
     }
 
 
@@ -97,9 +168,16 @@ public class Planet : MonoBehaviour
         var currentValue = oldPlanet.transform.position;
         var endValue = new Vector3(currentValue.x - 2f, currentValue.y - 3f, currentValue.z - 2f);
         oldPlanet.transform.DOMove(endValue, 1.8f);
-        Destroy(oldPlanet, 3f);
+
+        Invoke("pushOldPlanetFarrer", 1.8f);
+       
     }
 
+    public void pushOldPlanetFarrer()
+    {
+        oldPlanet.transform.DOMoveZ(oldPlanet.transform.position.z - 8f, 1.8f);
+        Destroy(oldPlanet, 3f);
+    }
 
 
     int _innerLevel, _nextInnerLevel, _nextNextInnerLevel;
@@ -171,17 +249,7 @@ public class Planet : MonoBehaviour
     
     public void onResetGame()
     {
-
- 
-
-       
-       
-
-    
-
         //Invoke("onResetGameLate", .5f);
-
-
     }
 
     public void onResetGameLate()

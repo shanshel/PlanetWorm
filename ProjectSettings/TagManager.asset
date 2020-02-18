@@ -18,9 +18,9 @@ TagManager:
   - WormHead
   - WormSmallHead
   - EnvCollids
-  - 
-  - 
-  - 
+  - Planet
+  - EffectByLight
+  - NotEffectByLight
   - 
   - 
   - 

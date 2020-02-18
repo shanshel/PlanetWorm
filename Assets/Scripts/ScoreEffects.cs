@@ -12,6 +12,15 @@ public class ScoreEffects : MonoBehaviour
     private void Awake()
     {
         inst = this;
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
     }
     public void doPointEffect(Transform target, int comboCount, int pointCount)
     {
@@ -49,7 +58,7 @@ public class ScoreEffects : MonoBehaviour
         pointInst.transform.DOMoveY(pointInst.transform.position.y + 1f, .4f);
         pointInst.transform.DOScale(0f, .4f).WaitForCompletion();
         GameManager.inst.increaseScore(pointCount + comboCount);
-        Destroy(pointInst, .62f);
+        Destroy(pointInst.gameObject, .62f);
 
     }
 

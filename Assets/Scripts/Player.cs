@@ -15,7 +15,18 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         inst = this;
+        return;
+        if (inst != null && inst != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            inst = this;
+        }
     }
+
+
     void Start()
     {
         playerHeadDefaultPos = playerHead.transform.position;
@@ -30,23 +41,31 @@ public class Player : MonoBehaviour
         playerHeadMainMenuPos = new Vector3(randomX, randomY, conZ);
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-        if (!GameManager.inst.isGameStarted)
-        {
-            playerHead.transform.position = Vector3.MoveTowards(playerHead.transform.position , playerHeadMainMenuPos, Time.smoothDeltaTime);
-            return;
-        }
-        else
-        {
-            playerHead.transform.position = Vector3.MoveTowards(playerHead.transform.position, playerHeadDefaultPos, Time.smoothDeltaTime * 2f);
-        }
-         
+        if (!GameManager.inst.isGameStarted) return;
 
         var worldUp = Vector3.up;
         var lastDir = Planet.inst.getLastDir();
 
         playerHead.transform.LookAt(new Vector3(-lastDir.x * 5f, -lastDir.y * 5f, 7f), Vector3.up);
+    }
+
+    void Update()
+    {
+        if (!GameManager.inst.isGameStarted)
+        {
+            playerHead.transform.position = playerHeadMainMenuPos;
+            return;
+        }
+        else
+        {
+            playerHead.transform.position = playerHeadDefaultPos;
+
+        }
+         
+
+    
 
         /*
         if (!GameManager.inst.isLevelingUp)
@@ -76,6 +95,10 @@ public class Player : MonoBehaviour
         return followPoint;
     }
 
+    public void onPlayerEat()
+    {
+        playerHead.transform.DOShakePosition(.2f, .1f, 5, 40);
+    }
 
 
    

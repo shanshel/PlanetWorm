@@ -9,14 +9,11 @@ public class DeathDetector : MonoBehaviour
     {
         if (!GameManager.inst.isGameStarted || 
             GameManager.inst.isLevelingUp ||
-            GameManager.inst.isInProtection
+            GameManager.inst.isInProtection ||
+            GameManager.inst.isPlayerDied
             )
             return;
 
         GameManager.inst.death();
-
-
-
-
     }
 }

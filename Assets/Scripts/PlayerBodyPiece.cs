@@ -18,7 +18,7 @@ public class PlayerBodyPiece : MonoBehaviour
 
     private void Awake()
     {
-        baseScale = transform.localScale * 1.4f;
+        baseScale = new Vector3(.8f, .8f, .8f) * 1.4f;
 
     }
 
